@@ -11,3 +11,5 @@ roll-*.xml
 .*.swp
 */3rdparty/
 menu.cfg
+.idea
+*.iso

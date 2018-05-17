@@ -68,6 +68,29 @@ rm /tmp/my.cnf
 </stack:script>
 
 
+<stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3" stack:cond="not Ignore_Nics">
+import subprocess
+import os
+
+def getDevices():
+	#get mac address for interfaces
+	devices = {}
+	device_list = os.listdir("/sys/class/net")
+	for device in device_list:
+			if (device.startswith("i") or device.startswith("e")) and (device != "&Kickstart_PrivateInterface;"):
+				with open('/sys/class/net/' + device + "/address") as mac:
+					devices[device] = mac.readline().strip()
+	return devices
+
+interfaces = getDevices()
+for each in interfaces:
+	cmd = ["/opt/stack/bin/stack", "add", "host", "interface", "&Kickstart_PrivateHostname;", "interface=" + each,
+		   "mac=" + interfaces[each]]
+	subprocess.run(cmd)
+
+
+</stack:script>
+
 <stack:script cond="platform == 'aws'" stack:stage="install-post">
 <!-- Frontend DHCPs in AWS -->
 /opt/stack/bin/stack set host interface options &Kickstart_PrivateHostname; interface=&Kickstart_PrivateInterface; options=dhcp

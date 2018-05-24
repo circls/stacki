@@ -44,7 +44,7 @@ class Command(stack.commands.Command,
 				attr   = row['attr']
 				value  = row['value']
 
-				if regex and regex.match(attr):
+				if regex and not regex.match(attr):
 					continue
 
 				csv_attrs.append({'target': target, attr: value})
@@ -56,8 +56,9 @@ class Command(stack.commands.Command,
 
 		s = StringIO()
 		w = csv.DictWriter(s, header)
+		w.writeheader()
 		w.writerows(csv_attrs)
 
 		self.beginOutput()
-		self.addOutput(None, s.getvalue().strip())
+		self.addOutput('', s.getvalue().strip())
 		self.endOutput()

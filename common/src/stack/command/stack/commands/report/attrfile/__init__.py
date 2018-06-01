@@ -31,10 +31,12 @@ class Command(stack.commands.Command,
 		csv_attrs	= []
 		regex		= None
 
+		scope_data = {}
+
 		if attr_filter:
 			regex = re.compile(attr_filter)
 
-
+		#iterate through each scope and get the respective data
 		for scope in [ 'global', 'os', 'appliance', 'environment', 'host' ]:
 			for row in self.call('list.attr', [ 'scope=%s' % scope, 'resolve=false', 'const=false', 'shadow=false' ]):
 				if scope == 'global':
@@ -47,9 +49,16 @@ class Command(stack.commands.Command,
 				if regex and not regex.match(attr):
 					continue
 
-				csv_attrs.append({'target': target, attr: value})
+				if target not in scope_data:
+					scope_data[target] = {}
+				scope_data[target][attr] = value
+
 				if attr not in header:
 					header.append(attr)
+
+		for scope in scope_data:
+			scope_data[scope]['target'] = scope
+			csv_attrs.append(scope_data[scope])
 
 		header.sort()
 		header.insert(0, 'target')

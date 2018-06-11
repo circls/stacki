@@ -70,22 +70,11 @@ rm /tmp/my.cnf
 
 <stack:script stack:stage="install-post" stack:shell="/opt/stack/bin/python3" stack:cond="not Ignore_Nics">
 import subprocess
-import os
+from stack.util import getDevices
 
-def getDevices():
-	#get mac address for interfaces
-	devices = {}
-	device_list = os.listdir("/sys/class/net")
-	for device in device_list:
-			if (device.startswith("i") or device.startswith("e")) and (device != "&Kickstart_PrivateInterface;"):
-				with open('/sys/class/net/' + device + "/address") as mac:
-					devices[device] = mac.readline().strip()
-	return devices
-
-interfaces = getDevices()
-for each in interfaces:
-	cmd = ["/opt/stack/bin/stack", "add", "host", "interface", "&Kickstart_PrivateHostname;", "interface=" + each,
-		   "mac=" + interfaces[each]]
+for _, interface, hwaddr in getDevices(["&Kickstart_PrivateInterface;"]):
+	cmd = ["/opt/stack/bin/stack", "add", "host", "interface", "&Kickstart_PrivateHostname;", "interface=" + interface,
+		   "mac=" + hwaddr]
 	subprocess.run(cmd)
 
 

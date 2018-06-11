@@ -69,5 +69,5 @@ class Command(stack.commands.Command,
 		w.writerows(csv_attrs)
 
 		self.beginOutput()
-		self.addOutput('', s.getvalue().strip())
-		self.endOutput()
+		self.addOutput(None, s.getvalue().strip())
+		self.endOutput(trimOwner=True)
